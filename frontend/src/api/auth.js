@@ -12,10 +12,18 @@ export const login = async (email, password) => {
   if (!res.ok) throw new Error(data.error || "Error en login");
 
   // guarda token y usuario
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("user", JSON.stringify(data.usuario));
+  const usuario = data.usuario || data.token?.usuario;
+  
+  if (!usuario) {
+    throw new Error("No se recibió información del usuario");
+  }
 
-  return data.usuario;
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(usuario));
+
+  console.log('Login exitoso, usuario:', usuario);
+  
+  return usuario;
 };
 
 // REGISTRO (unificado: cliente, empleado, admin)

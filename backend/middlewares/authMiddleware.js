@@ -12,12 +12,13 @@ module.exports = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        //Guarda el id y rol del usuario en req.user
+        // Guarda el id y rol del usuario en req.user
         req.user = decoded;
-            next();
-
+        
+        console.log('Token validado:', req.user);
+        
         next();
     } catch (error) {
-        return res.status(401).json({ message: "Token inválido" });
+        return res.status(401).json({ message: "Token inválido", error: error.message });
     }
 };

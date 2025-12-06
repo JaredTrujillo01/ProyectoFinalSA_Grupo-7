@@ -55,8 +55,16 @@ const loginUsuario = async (email, password) => {
   const valid = await comparePassword(password, usuario.password);
   if (!valid) throw new Error('Contraseña incorrecta');
 
+  // Manejar tanto modelo Sequelize como objeto plano
+  const usuarioObj = usuario.get ? usuario.get({ plain: true }) : usuario;
+
+  // Asegurar que siempre tiene un rol válido
+  const rol = usuarioObj.rol || 'cliente';
+  
+  console.log('Usuario encontrado:', { id: usuarioObj.usuario_id, email: usuarioObj.email, rol });
+
   // Devuelve token JWT
-  const payload = { id: usuario.usuario_id, nombre: usuario.nombre, rol: usuario.rol, email: usuario.email };
+  const payload = { id: usuarioObj.usuario_id, nombre: usuarioObj.nombre, rol, email: usuarioObj.email };
   const token = generateToken(payload);
 
   return { message: 'Login exitoso', token, usuario: payload };
