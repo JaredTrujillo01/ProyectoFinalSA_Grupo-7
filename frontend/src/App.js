@@ -1,20 +1,21 @@
-import { AuthProvider } from "./context/AuthContext";
-import LoginPage from "./pages/loginpages";
-import RegisterClientePage from "./pages/registerclipages";
-import RegisterEmpleadoPage from "./pages/registeremppage";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+//                                                     ↑ Añade Navigate
+import Login from "./pages/Login";
+import RegistroCliente from "./pages/RegistroCliente";
+import RegistroEmpleado from "./pages/RegistroEmpleado";
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="App">
-        <h1>Mi App</h1>
-        <LoginPage />
-        <hr />
-        <RegisterClientePage />
-        <hr />
-        <RegisterEmpleadoPage />
-      </div>
-    </AuthProvider>
+    <BrowserRouter>
+      <Routes>
+        {/* Redirecciona automáticamente de / a /login */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro-cliente" element={<RegistroCliente />} />
+        <Route path="/registro-empleado" element={<RegistroEmpleado />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
