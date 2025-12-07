@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Control</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>Admin</h2>
+        <ul>
+            <li><a class="active" href="../panel-control/index.html">Panel</a></li>
+            <li><a href="../sucursales/index.html">Sucursales</a></li>
+            <li><a href="../carros/index.html">Carros</a></li>
+        </ul>
+    </aside>
+
+    <main class="content">
+        <h1>Panel de Control</h1>
+
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Sucursales</h3>
+                <p id="suc-total" class="number">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Carros registrados</h3>
+                <p id="car-total" class="number">0</p>
+            </div>
+        </div>
+
+        <div class="welcome">
+            <h2>Bienvenido al sistema administrativo</h2>
+            <p>Desde aquí podés gestionar tus sucursales, carros y toda la estructura interna.</p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
