@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import RegistroCliente from "./pages/RegistroCliente";
 import RegistroEmpleado from "./pages/RegistroEmpleado";
+import VehicleList from "./pages/VehicleList";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         
         <Route path="/login" element={<Login />} />
+        <Route path="/lista-vehiculos" element={<VehicleList />} />
         <Route path="/registro-cliente" element={<RegistroCliente />} />
         <Route path="/registro-empleado" element={<RegistroEmpleado />} />
       </Routes>
