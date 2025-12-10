@@ -1,37 +1,38 @@
-import React from "react";
-import { Card, CardContent, CardMedia, Typography, Grid, Chip, Box } from "@mui/material";
-import PrimaryButton from "../buttons/primarybutton";
 
-const VehicleCard = ({ vehiculo, onRentClick, compact = false, showButton = true }) => {
-  
+import React from "react";
+import { Card, CardContent, CardMedia, Typography, Chip, Box } from "@mui/material";
+import PrimaryButton from "../buttons/primarybutton";
+import { getCarImage } from "../../utils/carimages";
+
+const VehicleCard = ({ vehiculo = {}, onRentClick, compact = false, showButton = true }) => {
+  const imageSrc = getCarImage(vehiculo.marca, vehiculo.modelo);
+  const categoriaNombre = vehiculo.categoria?.nombre || "Sin categoría";  // Nombre de la categoría
+  const precioCategoria = vehiculo.categoria?.costo_por_dia || vehiculo.precioDia || 0;  // Precio de la categoría
+
   return (
     <Card sx={{ boxShadow: 6, borderRadius: 2 }}>
       <CardContent sx={{ p: compact ? 1 : 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          {/* Imagen - 20% aprox */}
-          <Grid item xs={12} sm={3} md={3}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: 'center' }}>
+          <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
             <CardMedia
               component="img"
-              image={vehiculo.imagen || "https://via.placeholder.com/300x160"}
-              alt={`${vehiculo.marca} ${vehiculo.modelo}`}
-              sx={{ height: 100, borderRadius: 1, objectFit: "cover" }}
+              image={imageSrc}
+              alt={`${vehiculo.marca || ''} ${vehiculo.modelo || ''}`}
+              sx={{ height: 100, borderRadius: 1, objectFit: "cover", width: '100%' }}
             />
-          </Grid>
+          </Box>
 
-          {/* Descripción - 60% aprox */}
-          <Grid item xs={12} sm={6} md={6}>
+          <Box sx={{ width: { xs: '100%', sm: '50%' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               {vehiculo.marca} {vehiculo.modelo}
             </Typography>
-
             <Typography variant="body2" color="text.secondary">
-              {vehiculo.categoria || "Categoria no especificada"} · {vehiculo.placa || "—"}
+              {categoriaNombre} · {vehiculo.placa || "—"}
+              {/* Muestra nombre de categoría */}
             </Typography>
-
             <Typography variant="body2" color="text.secondary">
               Año: {vehiculo.anio || "—"}
             </Typography>
-
             <Box mt={1}>
               <Chip
                 label={vehiculo.estado || "Desconocido"}
@@ -39,14 +40,13 @@ const VehicleCard = ({ vehiculo, onRentClick, compact = false, showButton = true
                 size="small"
               />
             </Box>
-          </Grid>
+          </Box>
 
-          {/* Precio + botón - 20% aprox */}
-          <Grid item xs={12} sm={3} md={3} textAlign="right">
+          <Box sx={{ width: { xs: '100%', sm: '25%' }, textAlign: { xs: 'left', sm: 'right' } }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              ${Number(vehiculo.precioDia || 0).toFixed(2)}
+              ${Number(precioCategoria).toFixed(2)}
+              {/* Precio de la categoría */}
             </Typography>
-
             {showButton && (
               <Box mt={2}>
                 <PrimaryButton onClick={() => onRentClick?.(vehiculo)}>
@@ -54,8 +54,8 @@ const VehicleCard = ({ vehiculo, onRentClick, compact = false, showButton = true
                 </PrimaryButton>
               </Box>
             )}
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

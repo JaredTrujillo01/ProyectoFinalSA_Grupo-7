@@ -22,4 +22,15 @@ const listCarros = async (req,res) => {
   }
 };
 
-module.exports = { createCarro, listCarros };
+const getCarros = async (req, res) => {
+  try {
+    const carros = await Carro.findAll({
+      include: [{ model: Categoria, as: 'categoria' }]  // Incluye categoría
+    });
+    res.json(carros);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { createCarro, listCarros, getCarros };

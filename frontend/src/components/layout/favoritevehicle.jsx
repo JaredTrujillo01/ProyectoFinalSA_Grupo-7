@@ -1,20 +1,19 @@
 import React from 'react';
-import { Box, Typography, Grid } from '@mui/material';
-import VehicleCard from './VehicleCard';
+import { Box, Typography } from '@mui/material';
+import VehicleCard from './../vehicles/VehicleCard';
 const FavoriteVehicles = ({ vehicles }) => {
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2, py: 6 }}>
       <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold', color: 'grey.800', mb: 4 }}>
         Los Vehículos favoritos de nuestros clientes
       </Typography>
-      
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
         {vehicles.map((vehicle, index) => (
-          <Grid item xs={12} md={4} key={index}>
-            <VehicleCard vehicle={vehicle} />
-          </Grid>
+          <Box key={index}>
+            <VehicleCard vehiculo={vehicle} />
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };

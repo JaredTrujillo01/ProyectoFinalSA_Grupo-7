@@ -1,5 +1,5 @@
-import react from 'react';
-import { AppBar, Toolbar, Typography,IconButton, Box } from '@mui/material';
+import React from 'react';
+import { AppBar, Toolbar, Typography,IconButton,Button, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
 
@@ -35,3 +35,5 @@ const Header = ({onMenuClick, onProfileClick}) => {
     </AppBar>
   );
 };
+
+export default Header;

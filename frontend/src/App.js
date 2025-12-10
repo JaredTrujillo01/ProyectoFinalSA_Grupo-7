@@ -1,23 +1,36 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-//                                                     ↑ Añade Navigate
 import Login from "./pages/Login";
 import RegistroCliente from "./pages/RegistroCliente";
 import RegistroEmpleado from "./pages/RegistroEmpleado";
 import VehicleList from "./pages/VehicleList";
+import HomePage from "./pages/home";
+import RegistroVehiculo from "./pages/registrovehiculo";
+import { AuthProvider } from "./context/AuthContext";
+import { CarrosProvider } from "./context/carroContext";
+import { CategoriasProvider } from './context/categoriaContext';  // Nuevo
+
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Redirecciona automáticamente de / a /login */}
-        <Route path="/" element={<Navigate to="/login" />} />
-        
-        <Route path="/login" element={<Login />} />
-        <Route path="/lista-vehiculos" element={<VehicleList />} />
-        <Route path="/registro-cliente" element={<RegistroCliente />} />
-        <Route path="/registro-empleado" element={<RegistroEmpleado />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <CategoriasProvider>
+      <CarrosProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Redirecciona automáticamente de / a /login */}
+            <Route path="/" element={<Navigate to="/login" />} />
+            
+            <Route path="/login" element={<Login />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/lista-vehiculos" element={<VehicleList />} />
+            <Route path="/registro-cliente" element={<RegistroCliente />} />
+            <Route path="/registro-empleado" element={<RegistroEmpleado />} />
+            <Route path="/registro-vehiculo" element={<RegistroVehiculo />} />
+          </Routes>
+        </BrowserRouter>
+      </CarrosProvider>
+      </CategoriasProvider>
+    </AuthProvider>
   );
 }
 
