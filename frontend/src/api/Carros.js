@@ -1,56 +1,67 @@
-// api/carrosApi.js
-const API_URL = "http://localhost:4000/api";  // Ajusta a tu backend
+const API_URL = "http://localhost:4000/api"; // Ajusta según tu backend
 
-export const getCarros = async (filter = {}) => {
+// Función genérica para manejar peticiones con token
+const fetchWithToken = async (url, options = {}) => {
   const token = localStorage.getItem("token");
-  const query = new URLSearchParams(filter).toString();
-  const res = await fetch(`${API_URL}/carros?${query}`, {
-    headers: token ? { "Authorization": `Bearer ${token}` } : {}
-  });
+
+  if (!token) throw new Error("No hay token, por favor inicia sesión");
+
+  // Aseguramos los headers y el token
+  options.headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+    ...options.headers
+  };
+
+  console.log("Token enviado:", token);
+  console.log("URL:", url, "Options:", options);
+
+  const res = await fetch(url, options);
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error obteniendo carros");
+
+  console.log("Respuesta backend:", res.status, data);
+
+  if (!res.ok) throw new Error(data.error || "Error en la petición");
   return data;
 };
 
+// Obtener carros (opcional con filtros)
+export const getCarros = async (filter = {}) => {
+  const query = new URLSearchParams(filter).toString();
+  const url = `${API_URL}/carros${query ? `?${query}` : ""}`;
+  return await fetchWithToken(url, { method: "GET" });
+};
+
+// Crear carro
 export const createCarro = async (carroData) => {
   const token = localStorage.getItem("token");
+  if (!token) throw new Error("No hay token, por favor inicia sesión");
+
   const res = await fetch(`${API_URL}/carros`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
+      "Authorization": `Bearer ${token}` // Token válido del login
     },
     body: JSON.stringify(carroData)
   });
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Error creando carro");
   return data;
 };
 
+// Actualizar carro
 export const updateCarro = async (id, changes) => {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${API_URL}/carros/${id}`, {
+  return await fetchWithToken(`${API_URL}/carros/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
     body: JSON.stringify(changes)
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Error actualizando carro");
-  return data;
 };
 
+// Eliminar carro
 export const deleteCarro = async (id) => {
-  const token = localStorage.getItem("token");
-  const res = await fetch(`${API_URL}/carros/${id}`, {
-    method: "DELETE",
-    headers: { "Authorization": `Bearer ${token}` }
+  return await fetchWithToken(`${API_URL}/carros/${id}`, {
+    method: "DELETE"
   });
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error || "Error eliminando carro");
-  }
-  return { message: "Carro eliminado" };
 };
