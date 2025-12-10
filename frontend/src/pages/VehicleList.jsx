@@ -1,12 +1,10 @@
-// pages/VehicleList.jsx
-import { Box, Typography, Alert } from "@mui/material";
-import React, { useState, useContext, useEffect } from "react";
+import { Grid, Box, Typography, Alert } from "@mui/material";
+import React, { useState } from "react";
 import VehicleCard from "../components/vehicles/VehicleCard";
 import FilterPanel from "../components/vehicles/FilterPanel";
-import { CarrosContext } from "../context/carroContext";
+import { reservationService } from "../services/reservationService";
 
 const VehicleList = () => {
-  const { carros, loadCarros } = useContext(CarrosContext);
   const [filters, setFilters] = useState({
     branch: "",
     category: "",
@@ -16,25 +14,12 @@ const VehicleList = () => {
     startDate: "",
     endDate: ""
   });
+
   const [errorFecha, setErrorFecha] = useState("");
-  const [vehiculos, setVehiculos] = useState([]);
+  const [vehiculos, setVehiculos] = useState(mockVehiculos);
 
-  useEffect(() => {
-    const fetchCarros = async () => {
-      try {
-        await loadCarros();
-      } catch (error) {
-        console.error("Error cargando carros:", error);
-      }
-    };
-    fetchCarros();
-  }, [loadCarros]);
-
-  useEffect(() => {
-    setVehiculos(carros);
-  }, [carros]);
-
-  const handleSearch = async () => {
+  const handleSearch = () => {
+    // Validación de fecha
     if (filters.startDate && filters.endDate) {
       if (filters.endDate < filters.startDate) {
         setErrorFecha("La fecha final no puede ser menor que la inicial.");
@@ -42,30 +27,43 @@ const VehicleList = () => {
       }
     }
     setErrorFecha("");
-    try {
-      await loadCarros({
-        sucursal: filters.branch,
-        categoria: filters.category,
-        marca: filters.brand,
-        precioMin: filters.priceMin,
-        precioMax: filters.priceMax,
-      });
-    } catch (error) {
-      console.error("Error filtrando carros:", error);
-    }
+
+    // API
+
+    let resultado = mockVehiculos.filter((v) => {
+      if (filters.branch && v.sucursal !== filters.branch) return false;
+      if (filters.category && v.categoria !== filters.category) return false;
+      if (filters.brand && v.marca !== filters.brand) return false;
+      if (filters.priceMin && v.precioDia < Number(filters.priceMin)) return false;
+      if (filters.priceMax && v.precioDia > Number(filters.priceMax)) return false;
+      return true;
+    });
+
+    setVehiculos(resultado);
   };
 
-  const handleRentClick = (vehiculo) => {
-    console.log("Rentar:", vehiculo);
-  };
+const handleRentClick = (vehiculo) => {
+  const payload = reservationService.makeReservationPayload({
+    vehicle: vehiculo,
+    startDate: filters.startDate || "",
+    endDate: filters.endDate || "",
+    branch: filters.branch || ""
+  });
+
+  reservationService.saveTemp(payload);
+
+  window.location.href = "/reserva";
+};
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
         Lista de Vehículos
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-        <Box sx={{ width: { xs: '100%', md: '28%' } }}>
+
+      <Grid container spacing={3}>
+        {/* Panel filtros */}
+        <Grid item xs={12} md={3}>
           <Box sx={{ p: 2, boxShadow: 4, borderRadius: 2 }}>
             <FilterPanel
               filters={filters}
@@ -73,31 +71,61 @@ const VehicleList = () => {
               onSearch={handleSearch}
             />
           </Box>
+
           {errorFecha && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {errorFecha}
             </Alert>
           )}
-        </Box>
+        </Grid>
 
-        <Box sx={{ width: { xs: '100%', md: '72%' } }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Lista */}
+        <Grid item xs={12} md={9}>
+          <Grid container spacing={2}>
             {vehiculos.length === 0 && (
-              <Box>
+              <Grid item xs={12}>
                 <Alert severity="info">No se encontraron vehículos.</Alert>
-              </Box>
+              </Grid>
             )}
 
             {vehiculos.map((v) => (
-              <Box key={v.carro_id}>
+              <Grid item xs={12} key={v.id}>
                 <VehicleCard vehiculo={v} onRentClick={handleRentClick} />
-              </Box>
+              </Grid>
             ))}
-          </Box>
-        </Box>
-      </Box>
+          </Grid>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
+
+// Mockup de la lista de vehiculos para que funcione sin la API
+const mockVehiculos = [
+  {
+    id: 1,
+    imagen: "https://via.placeholder.com/300",
+    marca: "Toyota",
+    modelo: "Corolla",
+    categoria: "Sedan",
+    placa: "ABC-123",
+    anio: 2021,
+    estado: "Disponible",
+    precioDia: 45,
+    sucursal: "Tegucigalpa"
+  },
+  {
+    id: 2,
+    imagen: "https://via.placeholder.com/300",
+    marca: "Honda",
+    modelo: "CR-V",
+    categoria: "SUV",
+    placa: "DEF-456",
+    anio: 2020,
+    estado: "Mantenimiento",
+    precioDia: 70,
+    sucursal: "San Pedro"
+  }
+];
 
 export default VehicleList;
