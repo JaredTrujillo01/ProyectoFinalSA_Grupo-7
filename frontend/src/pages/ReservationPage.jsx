@@ -1,4 +1,3 @@
-// src/pages/ReservationPage.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Card, CardContent, Typography, Box, Button, Alert } from "@mui/material";
 import VehicleCard from "../components/vehicles/VehicleCard";
@@ -36,8 +35,8 @@ const ReservationPage = () => {
         setEndDate(temp.endDate);
         setBranch(temp.branch);
       } else {
-        // no vehicle: redirect back to lista
-        navigate("/vehiculos");
+        // no vehicle: redirije a lista
+        navigate("/lista-vehiculos");
       }
     }
     // eslint-disable-next-line
@@ -60,7 +59,7 @@ const ReservationPage = () => {
       return;
     }
 
-    // create payload
+    // crea el payload
     const payload = reservationService.makeReservationPayload({
       vehicle,
       startDate,
@@ -68,14 +67,14 @@ const ReservationPage = () => {
       branch
     });
 
-    // calculate total
+    // calcula total
     const total = calculatePaymentTotal(payload.daily_price, startDate, endDate);
     payload.totalAmount = total;
 
-    // save temp to localStorage as fallback
+    // guarda temp en localStorage como fallback
     reservationService.saveTemp(payload);
 
-    // navigate to payment passing reservation
+    // naviga a los pagos desde reservación
     navigate("/pago", { state: { reservation: payload } });
   };
 
@@ -118,7 +117,7 @@ const ReservationPage = () => {
           </Box>
 
           <Box display="flex" gap={2}>
-            <Button variant="outlined" onClick={() => navigate("/vehiculos")}>Volver</Button>
+            <Button variant="outlined" onClick={() => navigate("/lista-vehiculos")}>Volver</Button>
             <Button variant="contained" onClick={handleConfirm}>Confirmar y pagar</Button>
           </Box>
         </CardContent>

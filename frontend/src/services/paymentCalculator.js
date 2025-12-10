@@ -1,4 +1,3 @@
-// src/services/paymentCalculator.js
 export const calculatePaymentTotal = (dailyPrice, startDate, endDate) => {
   if (!dailyPrice || !startDate || !endDate) return 0;
   const start = new Date(startDate);

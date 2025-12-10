@@ -1,5 +1,5 @@
-// src/services/reservationService.js
 // simple helper to create reservation payload and persist temp to localStorage as fallback
+//helper para crear reservacion 
 export const reservationService = {
   makeReservationPayload: ({ vehicle, startDate, endDate, branch }) => {
     const base = {
@@ -16,7 +16,7 @@ export const reservationService = {
       endDate: endDate || ""
     };
 
-    // generate temp id
+    // genera temp id
     base.reservationId = `R-${Date.now()}`;
     base.status = "Pendiente";
     return base;

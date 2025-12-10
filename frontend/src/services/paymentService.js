@@ -1,5 +1,4 @@
-// src/services/paymentService.js
-// Simple factory + validators usage internally (kept minimal so UI decide validations)
+// Simple factory + validators usage internally
 export class PaymentFactory {
   static create(type, data) {
     if (type === "card") return new CardPayment(data);

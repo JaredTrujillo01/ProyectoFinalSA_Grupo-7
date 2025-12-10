@@ -1,4 +1,3 @@
-// src/utils/validators.js
 export function luhnCheck(cc = "") {
   const s = cc.replace(/\D/g, "");
   let sum = 0;

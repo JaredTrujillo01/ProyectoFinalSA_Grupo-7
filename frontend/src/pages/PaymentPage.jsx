@@ -1,4 +1,3 @@
-// src/pages/PaymentPage.jsx
 import React, { useEffect, useState } from "react";
 import {
   Container,
@@ -16,22 +15,42 @@ import { calculatePaymentTotal } from "../services/paymentCalculator";
 import { PaymentFactory } from "../services/paymentService";
 import { luhnCheck, validateExpiry, isValidCVV, isValidEmail } from "../utils/validators";
 import { reservationService } from "../services/reservationService";
+import { Snackbar, Alert as MuiAlert } from "@mui/material";
+
+//formatea la fecha de expiracion a MM/AA
+const formatExpiry = (value) => {
+  let v = value.replace(/\D/g, ""); // solo números
+
+  if (v.length >= 3) {
+    v = v.replace(/(\d{2})(\d{1,2}).*/, "$1/$2"); // MM/AA
+  }
+
+  return v;
+};
 
 const PaymentPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState(state?.reservation ?? null);
+  const [snack, setSnack] = useState({
+  open: false,
+  severity: "success",
+  message: ""
+});
   const [method, setMethod] = useState("card");
   const [card, setCard] = useState({ number: "", name: "", exp: "", cvv: "" });
   const [paypalEmail, setPaypalEmail] = useState("");
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(false);
+  const openSnack = (severity, message) => {
+  setSnack({ open: true, severity, message });
+};
 
   useEffect(() => {
     if (!reservation) {
       const temp = reservationService.loadTemp();
       if (temp) setReservation(temp);
-      else navigate("/vehiculos");
+      else navigate("/lista-vehiculos");
     }
     // eslint-disable-next-line
   }, []);
@@ -48,6 +67,7 @@ const PaymentPage = () => {
     return null;
   };
 
+  //proceso de pagos
   const handlePay = async () => {
     setError("");
     if (method === "card") {
@@ -57,7 +77,7 @@ const PaymentPage = () => {
       if (!isValidEmail(paypalEmail)) { setError("Email de PayPal inválido"); return; }
     }
 
-    // create payment object
+    // crea payment object
     const paymentObj = method === "card"
       ? PaymentFactory.create("card", { number: card.number.replace(/\s+/g, ""), name: card.name, exp: card.exp, cvv: card.cvv })
       : PaymentFactory.create("paypal", { email: paypalEmail });
@@ -67,23 +87,23 @@ const PaymentPage = () => {
 
     setProcessing(true);
 
-    // simulate API call
+    // simula API call
     await new Promise((res) => setTimeout(res, 1000));
 
     const success = true; // toggle to false to simulate failure
-    if (success) {
-      const updated = { ...reservation, status: "Pagada", paidAt: new Date().toISOString() };
-      // if you want to persist elsewhere, call API here
+      if (success) {
+      openSnack("success", "Pago realizado con éxito");
       reservationService.clearTemp();
-      setReservation(updated);
-      setProcessing(false);
-      // go to dashboard or bookings list
-      navigate("/dashboard-cliente"); // adjust route to your app
-    } else {
-      setProcessing(false);
-      setError("Pago fallido — verifique los datos o intente otro método");
-    }
-  };
+      setTimeout(() => {
+        navigate("/lista-vehiculos");
+      }, 1500);
+      return;
+      } else {
+        setProcessing(false);
+        //openSnack("error", "Pago fallido — verifica tus datos");
+        setError("Pago fallido — verifique los datos o intente otro método");
+      }
+    };
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -134,12 +154,14 @@ const PaymentPage = () => {
                     />
                     <Box display="flex" gap={1}>
                       <TextField
-                        label="Expiración (MM/AA)"
-                        value={card.exp}
-                        onChange={(e) => setCard({ ...card, exp: e.target.value })}
-                        fullWidth
-                        margin="normal"
-                      />
+                          label="Expiración (MM/AA)"
+                          value={card.exp}
+                          onChange={(e) =>
+                            setCard({ ...card, exp: formatExpiry(e.target.value) })
+                          }
+                          fullWidth
+                          margin="normal"
+                        />
                       <TextField
                         label="CVV"
                         value={card.cvv}
@@ -171,10 +193,28 @@ const PaymentPage = () => {
               >
                 {processing ? "Procesando..." : `Pagar ($${total.toFixed(2)})`}
               </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{ mt: 1 }}
+                onClick={() => navigate("/reserva")}
+              >
+                Cancelar Pago
+              </Button>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+      <Snackbar
+          open={snack.open}
+          autoHideDuration={3000}
+          onClose={() => setSnack({ ...snack, open: false })}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <MuiAlert severity={snack.severity} variant="filled" onClose={() => setSnack({ ...snack, open: false })}>
+            {snack.message}
+          </MuiAlert>
+        </Snackbar>
     </Container>
   );
 };
