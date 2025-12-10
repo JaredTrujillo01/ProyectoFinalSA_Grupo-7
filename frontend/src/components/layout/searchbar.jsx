@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, TextField, MenuItem, Button, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy }) => {
+const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy, categorias = [], brands = [] }) => {
   const [errors, setErrors] = useState({});
 
   const handleSearch = () => {
@@ -25,23 +25,11 @@ const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy })
           fullWidth
         >
           <MenuItem value="">Marca</MenuItem>
-          <MenuItem value="toyota">Toyota</MenuItem>
-          <MenuItem value="honda">Honda</MenuItem>
-          <MenuItem value="ford">Ford</MenuItem>
-          <MenuItem value="chevrolet">Chevrolet</MenuItem>
-        </TextField>
-
-        <TextField
-          select
-          label="Modelo"
-          value={searchData.modelo}
-          onChange={(e) => onSearchChange('modelo', e.target.value)}
-          fullWidth
-        >
-          <MenuItem value="">Modelo</MenuItem>
-          <MenuItem value="corolla">Corolla</MenuItem>
-          <MenuItem value="civic">Civic</MenuItem>
-          <MenuItem value="mustang">Mustang</MenuItem>
+          {brands.map((brand) => (
+            <MenuItem key={brand} value={brand}>
+              {brand}
+            </MenuItem>
+          ))}
         </TextField>
 
         <TextField
@@ -52,10 +40,11 @@ const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy })
           fullWidth
         >
           <MenuItem value="">Categoría</MenuItem>
-          <MenuItem value="sedan">Sedán</MenuItem>
-          <MenuItem value="suv">SUV</MenuItem>
-          <MenuItem value="deportivo">Deportivo</MenuItem>
-          <MenuItem value="pickup">Pickup</MenuItem>
+          {categorias.map((cat) => (
+            <MenuItem key={cat.categoria_id} value={cat.nombre}>
+              {cat.nombre}
+            </MenuItem>
+          ))}
         </TextField>
 
         <TextField

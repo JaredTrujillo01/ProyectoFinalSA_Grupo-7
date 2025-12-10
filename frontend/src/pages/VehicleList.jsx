@@ -1,24 +1,74 @@
-import { Grid, Box, Typography, Alert } from "@mui/material";
-import React, { useState } from "react";
+import { Grid, Box, Typography, Alert, Container } from "@mui/material";
+import React, { useState, useContext, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import VehicleCard from "../components/vehicles/VehicleCard";
 import FilterPanel from "../components/vehicles/FilterPanel";
 import { reservationService } from "../services/reservationService";
+import { CarrosContext } from "../context/carroContext";
+import { CategoriasContext } from "../context/categoriaContext";
+import Header from "../components/layout/header";
 
 const VehicleList = () => {
+  const { carros, loadCarros } = useContext(CarrosContext);
+  const { categorias } = useContext(CategoriasContext);
+  const [searchParams] = useSearchParams();
+  
   const [filters, setFilters] = useState({
     branch: "",
-    category: "",
-    brand: "",
+    category: searchParams.get("category") || "",
+    brand: searchParams.get("brand") || "",
     priceMin: "",
     priceMax: "",
-    startDate: "",
-    endDate: ""
+    startDate: searchParams.get("startDate") || "",
+    endDate: searchParams.get("endDate") || ""
   });
 
   const [errorFecha, setErrorFecha] = useState("");
-  const [vehiculos, setVehiculos] = useState(mockVehiculos);
+  const [vehiculos, setVehiculos] = useState([]);
+  const [allVehiculos, setAllVehiculos] = useState([]);
+  const [uniqueBrands, setUniqueBrands] = useState([]);
+
+  // Cargar todos los vehículos al montar
+  useEffect(() => {
+    const fetchCarros = async () => {
+      try {
+        await loadCarros();
+      } catch (error) {
+        console.error("Error cargando carros:", error);
+      }
+    };
+    fetchCarros();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Actualizar lista SOLO cuando cambien los carros del contexto (carga inicial o CRUD)
+  useEffect(() => {
+    if (carros && carros.length > 0) {
+      setAllVehiculos(carros);
+      // Solo resetear vehiculos si no hay filtros activos
+      const hasActiveFilters = filters.category || filters.brand || filters.priceMin || filters.priceMax;
+      if (!hasActiveFilters) {
+        setVehiculos(carros);
+      }
+      // Extraer marcas únicas
+      const brands = [...new Set(carros.map(c => c.marca).filter(Boolean))];
+      setUniqueBrands(brands);
+    }
+  }, [carros, filters.category, filters.brand, filters.priceMin, filters.priceMax]);
+
+  // Aplicar filtros automáticamente cuando vengan de la búsqueda inicial
+  useEffect(() => {
+    const hasInitialFilters = searchParams.get("category") || searchParams.get("brand") || 
+                              searchParams.get("startDate") || searchParams.get("endDate");
+    if (hasInitialFilters && allVehiculos.length > 0) {
+      handleSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allVehiculos]);
 
   const handleSearch = () => {
+    console.log("Aplicando filtros:", filters);
+    
     // Validación de fecha
     if (filters.startDate && filters.endDate) {
       if (filters.endDate < filters.startDate) {
@@ -28,17 +78,38 @@ const VehicleList = () => {
     }
     setErrorFecha("");
 
-    // API
+    // Filtrar vehículos reales de la BD
+    let resultado = allVehiculos.filter((v) => {
+      // Sucursal: ignorado (campo no existe en BD)
+      
+      // Categoría: comparar exactamente con categoria.nombre
+      if (filters.category && filters.category !== "") {
+        const categoriaVehiculo = v.categoria?.nombre || "";
+        if (categoriaVehiculo !== filters.category) {
+          return false;
+        }
+      }
 
-    let resultado = mockVehiculos.filter((v) => {
-      if (filters.branch && v.sucursal !== filters.branch) return false;
-      if (filters.category && v.categoria !== filters.category) return false;
-      if (filters.brand && v.marca !== filters.brand) return false;
-      if (filters.priceMin && v.precioDia < Number(filters.priceMin)) return false;
-      if (filters.priceMax && v.precioDia > Number(filters.priceMax)) return false;
+      // Marca: comparar exactamente
+      if (filters.brand && filters.brand !== "") {
+        if (v.marca !== filters.brand) {
+          return false;
+        }
+      }
+
+      // Precio: usar categoria.costo_por_dia
+      const precio = Number(v.categoria?.costo_por_dia || 0);
+      if (filters.priceMin && filters.priceMin !== "" && precio < Number(filters.priceMin)) {
+        return false;
+      }
+      if (filters.priceMax && filters.priceMax !== "" && precio > Number(filters.priceMax)) {
+        return false;
+      }
+
       return true;
     });
 
+    console.log(`Filtrados: ${resultado.length} de ${allVehiculos.length}`);
     setVehiculos(resultado);
   };
 
@@ -56,10 +127,12 @@ const handleRentClick = (vehiculo) => {
 };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
-        Lista de Vehículos
-      </Typography>
+    <Container maxWidth={false} sx={{ minHeight: '100vh', bgcolor: 'grey.50', p: 0 }}>
+      <Header />
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
+          Lista de Vehículos
+        </Typography>
 
       <Grid container spacing={3}>
         {/* Panel filtros */}
@@ -69,6 +142,8 @@ const handleRentClick = (vehiculo) => {
               filters={filters}
               onChangeFilters={setFilters}
               onSearch={handleSearch}
+              categorias={categorias}
+              brands={uniqueBrands}
             />
           </Box>
 
@@ -89,43 +164,16 @@ const handleRentClick = (vehiculo) => {
             )}
 
             {vehiculos.map((v) => (
-              <Grid item xs={12} key={v.id}>
+              <Grid item xs={12} key={v.carro_id}>
                 <VehicleCard vehiculo={v} onRentClick={handleRentClick} />
               </Grid>
             ))}
           </Grid>
         </Grid>
       </Grid>
-    </Box>
+      </Box>
+    </Container>
   );
 };
-
-// Mockup de la lista de vehiculos para que funcione sin la API
-const mockVehiculos = [
-  {
-    id: 1,
-    imagen: "https://via.placeholder.com/300",
-    marca: "Toyota",
-    modelo: "Corolla",
-    categoria: "Sedan",
-    placa: "ABC-123",
-    anio: 2021,
-    estado: "Disponible",
-    precioDia: 45,
-    sucursal: "Tegucigalpa"
-  },
-  {
-    id: 2,
-    imagen: "https://via.placeholder.com/300",
-    marca: "Honda",
-    modelo: "CR-V",
-    categoria: "SUV",
-    placa: "DEF-456",
-    anio: 2020,
-    estado: "Mantenimiento",
-    precioDia: 70,
-    sucursal: "San Pedro"
-  }
-];
 
 export default VehicleList;

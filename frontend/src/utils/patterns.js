@@ -99,7 +99,8 @@ export class VehicleAPIAdapter {
     };
   }
 }
-export default {
+
+const patterns = {
   SearchValidationStrategy,
   BasicSearchValidation,
   AdvancedSearchValidation,
@@ -108,3 +109,5 @@ export default {
   searchEventBus,
   VehicleAPIAdapter
 };
+
+export default patterns;

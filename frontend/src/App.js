@@ -8,36 +8,43 @@ import RegistroVehiculo from "./pages/registrovehiculo";
 import AdminPanel from "./pages/panelAdmin";
 import { AuthProvider } from "./context/AuthContext";
 import { CarrosProvider } from "./context/carroContext";
-import { CategoriasProvider } from './context/categoriaContext';
-import { ClientesProvider } from './context/clientecontext';  
-import { SucursalesProvider } from './context/sucursalcontext';
-import ReservationPage from "./pages/ReservationPage";
-import PaymentPage from "./pages/PaymentPage";
+import { CategoriasProvider } from "./context/categoriaContext";
+import { ClientesProvider } from "./context/clientecontext";
+import { SucursalesProvider } from "./context/sucursalcontext";
 
 function App() {
   return (
     <AuthProvider>
       <CarrosProvider>
         <CategoriasProvider>
-          <ClientesProvider>  {/* Ahora definido */}
-            <SucursalesProvider> 
+          <ClientesProvider>
+            {" "}
+            {/* Ahora definido */}
+            <SucursalesProvider>
               <BrowserRouter>
                 <Routes>
-                   {/* Redirecciona automáticamente de / a /login */}
-                    <Route path="/" element={<Navigate to="/login" />} />
-            
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/home" element={<HomePage />} />
-                    <Route path="/reserva" element={<ReservationPage />} />
-                    <Route path="/pago" element={<PaymentPage />} />
-                    <Route path="/lista-vehiculos" element={<VehicleList />} />
-                    <Route path="/registro-cliente" element={<RegistroCliente />} />
-                    <Route path="/registro-empleado" element={<RegistroEmpleado />} />
-                    <Route path="/registro-vehiculo" element={<RegistroVehiculo />} />
-                    <Route path="/panel-admin" element={<AdminPanel />} />
-          </Routes>
-        </BrowserRouter>
-      </SucursalesProvider>
+                  {/* Redirecciona automáticamente de / a /login */}
+                  <Route path="/" element={<Navigate to="/login" />} />
+
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/lista-vehiculos" element={<VehicleList />} />
+                  <Route
+                    path="/registro-cliente"
+                    element={<RegistroCliente />}
+                  />
+                  <Route
+                    path="/registro-empleado"
+                    element={<RegistroEmpleado />}
+                  />
+                  <Route
+                    path="/registro-vehiculo"
+                    element={<RegistroVehiculo />}
+                  />
+                  <Route path="/panel-admin" element={<AdminPanel />} />
+                </Routes>
+              </BrowserRouter>
+            </SucursalesProvider>
           </ClientesProvider>
         </CategoriasProvider>
       </CarrosProvider>

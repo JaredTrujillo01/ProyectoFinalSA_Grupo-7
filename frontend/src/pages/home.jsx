@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Container } from '@mui/material'; // Opcional para envolver
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/layout/header';
 import SearchBar from '../components/layout/searchbar';
 import HeroSection from '../components/layout/herosection';
 import FavoriteVehicles from '../components/layout/favoritevehicle';
 import { BasicSearchValidation, searchEventBus } from '../utils/patterns';
+import { CarrosContext } from '../context/carroContext';
+import { CategoriasContext } from '../context/categoriaContext';
 
 const DriveNowApp = () => {
+  const navigate = useNavigate();
+  
   // Estado (Model)
   const [searchData, setSearchData] = useState({
     marca: '',
@@ -18,13 +23,35 @@ const DriveNowApp = () => {
   });
 
   const [validationStrategy] = useState(new BasicSearchValidation());
+  
+  // Obtener carros y categorias desde el contexto
+  const { carros, loadCarros } = useContext(CarrosContext);
+  const { categorias } = useContext(CategoriasContext);
+  const [favoriteVehicles, setFavoriteVehicles] = useState([]);
+  const [uniqueBrands, setUniqueBrands] = useState([]);
 
-  // Datos de ejemplo - En producción vendrían de una API
-  const [favoriteVehicles] = useState([
-    { id: 1, marca: 'Toyota', modelo: 'Corolla', categoria: 'Sedán', precio: 45 },
-    { id: 2, marca: 'Honda', modelo: 'CR-V', categoria: 'SUV', precio: 65 },
-    { id: 3, marca: 'Ford', modelo: 'Mustang', categoria: 'Deportivo', precio: 120 }
-  ]);
+  // Cargar carros al montar el componente
+  useEffect(() => {
+    const fetchCarros = async () => {
+      try {
+        await loadCarros();
+      } catch (error) {
+        console.error('Error cargando carros favoritos:', error);
+      }
+    };
+    fetchCarros();
+  }, [loadCarros]);
+
+  // Seleccionar solo los primeros 3 carros disponibles y extraer marcas
+  useEffect(() => {
+    if (carros && carros.length > 0) {
+      const disponibles = carros.filter(c => c.estado === 'disponible').slice(0, 3);
+      setFavoriteVehicles(disponibles);
+      // Extraer marcas únicas
+      const brands = [...new Set(carros.map(c => c.marca).filter(Boolean))];
+      setUniqueBrands(brands);
+    }
+  }, [carros]);
 
   // Suscripción al EventBus
   React.useEffect(() => {
@@ -45,9 +72,14 @@ const DriveNowApp = () => {
 
   const handleSearch = (data) => {
     console.log('Buscando vehículos con:', data);
-    // Aquí iría la llamada a la API usando el Adapter
-    // const adapter = new VehicleAPIAdapter(apiResponse);
-    // const vehicles = adapter.adapt();
+    // Navegar a VehicleList con los parámetros de búsqueda
+    const params = new URLSearchParams();
+    if (data.marca) params.set('brand', data.marca);
+    if (data.categoria) params.set('category', data.categoria);
+    if (data.entrega) params.set('startDate', data.entrega);
+    if (data.devolucion) params.set('endDate', data.devolucion);
+    
+    navigate(`/lista-vehiculos?${params.toString()}`);
   };
 
   const handleMenuClick = () => {
@@ -67,6 +99,8 @@ const DriveNowApp = () => {
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
         validationStrategy={validationStrategy}
+        categorias={categorias}
+        brands={uniqueBrands}
       />
       <FavoriteVehicles vehicles={favoriteVehicles} />
     </Container>

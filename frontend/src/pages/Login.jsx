@@ -22,7 +22,7 @@ const Login = () => {
       if (user.rol === "admin") {
         window.location.href = "/panel-admin";
       } else if (user.rol === "cliente") {
-        window.location.href = "/dashboard-cliente";
+        window.location.href = "/home";
       } else {
         window.location.href = "/dashboard-empleado";
       }
