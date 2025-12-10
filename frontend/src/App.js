@@ -11,6 +11,8 @@ import { CarrosProvider } from "./context/carroContext";
 import { CategoriasProvider } from './context/categoriaContext';
 import { ClientesProvider } from './context/clientecontext';  
 import { SucursalesProvider } from './context/sucursalcontext';
+import ReservationPage from "./pages/ReservationPage";
+import PaymentPage from "./pages/PaymentPage";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
             
                     <Route path="/login" element={<Login />} />
                     <Route path="/home" element={<HomePage />} />
+                    <Route path="/reserva" element={<ReservationPage />} />
+                    <Route path="/pago" element={<PaymentPage />} />
                     <Route path="/lista-vehiculos" element={<VehicleList />} />
                     <Route path="/registro-cliente" element={<RegistroCliente />} />
                     <Route path="/registro-empleado" element={<RegistroEmpleado />} />
