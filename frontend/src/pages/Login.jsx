@@ -20,7 +20,7 @@ const Login = () => {
       const user = await login(email, password);
 
       if (user.rol === "admin") {
-        window.location.href = "/registro-empleado";
+        window.location.href = "/panel-admin";
       } else if (user.rol === "cliente") {
         window.location.href = "/dashboard-cliente";
       } else {

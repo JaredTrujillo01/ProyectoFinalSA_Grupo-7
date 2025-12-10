@@ -11,14 +11,15 @@ export const login = async (email, password) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Error en login");
 
-  // guarda token y usuario
-  const usuario = data.usuario || data.token?.usuario;
-  
-  if (!usuario) {
-    throw new Error("No se recibió información del usuario");
-  }
+  // El backend responde { token: { message, token, usuario } }
+  const payload = data.token || {};
+  const token = payload.token; // JWT real
+  const usuario = payload.usuario || data.usuario;
 
-  localStorage.setItem("token", data.token);
+  if (!token) throw new Error("Token no recibido desde el backend");
+  if (!usuario) throw new Error("No se recibió información del usuario");
+
+  localStorage.setItem("token", token);
   localStorage.setItem("user", JSON.stringify(usuario));
 
   console.log('Login exitoso, usuario:', usuario);
