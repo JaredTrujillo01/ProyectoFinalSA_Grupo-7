@@ -32,7 +32,7 @@ export const SucursalesProvider = ({ children }) => {
   const editSucursal = async (id, changes) => {
     try {
       const updated = await updateSucursal(id, changes);
-      setSucursales(sucursales.map(s => s.id === id ? updated : s));
+      setSucursales(sucursales.map(s => s.sucuersal_id === id ? updated : s));
       return updated;
     } catch (error) {
       throw error;
@@ -42,7 +42,7 @@ export const SucursalesProvider = ({ children }) => {
   const removeSucursal = async (id) => {
     try {
       await deleteSucursal(id);
-      setSucursales(sucursales.filter(s => s.id !== id));
+      setSucursales(sucursales.filter(s => s.sucuersal_id !== id));
     } catch (error) {
       throw error;
     }

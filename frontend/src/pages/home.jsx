@@ -8,6 +8,7 @@ import FavoriteVehicles from '../components/layout/favoritevehicle';
 import { BasicSearchValidation, searchEventBus } from '../utils/patterns';
 import { CarrosContext } from '../context/carroContext';
 import { CategoriasContext } from '../context/categoriaContext';
+import { SucursalesContext } from '../context/sucursalcontext';
 
 const DriveNowApp = () => {
   const navigate = useNavigate();
@@ -24,9 +25,10 @@ const DriveNowApp = () => {
 
   const [validationStrategy] = useState(new BasicSearchValidation());
   
-  // Obtener carros y categorias desde el contexto
+  // Obtener carros, categorias y sucursales desde el contexto
   const { carros, loadCarros } = useContext(CarrosContext);
   const { categorias } = useContext(CategoriasContext);
+  const { sucursales } = useContext(SucursalesContext);
   const [favoriteVehicles, setFavoriteVehicles] = useState([]);
   const [uniqueBrands, setUniqueBrands] = useState([]);
 
@@ -101,6 +103,7 @@ const DriveNowApp = () => {
         validationStrategy={validationStrategy}
         categorias={categorias}
         brands={uniqueBrands}
+        sucursales={sucursales}
       />
       <FavoriteVehicles vehicles={favoriteVehicles} />
     </Container>

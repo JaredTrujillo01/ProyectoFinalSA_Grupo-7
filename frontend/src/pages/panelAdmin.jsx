@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import AdminClients from "../components/admin/adminclients";
 import AdminVehicles from "../components/admin/adminvehicles";
 import AdminBranches from "../components/admin/adminbranches";
+import AdminCategories from "../components/admin/admincategories";
+import AdminEmployees from "../components/admin/adminemployees";
 
 const drawerWidth = 240;
 
@@ -39,6 +41,8 @@ const AdminPanel = () => {
   const menuItems = [
     { key: "clients", label: "Lista de Clientes" },
     { key: "vehicles", label: "Registro de Vehículos" },
+    { key: "employees", label: "Empleados" },
+    { key: "categories", label: "Categorías" },
     { key: "branches", label: "Sucursales" },
   ];
 
@@ -48,6 +52,10 @@ const AdminPanel = () => {
         return <AdminClients />;
       case "vehicles":
         return <AdminVehicles />;
+      case "employees":
+        return <AdminEmployees />;
+      case "categories":
+        return <AdminCategories />;
       case "branches":
         return <AdminBranches />;
       default:
@@ -89,11 +97,6 @@ const AdminPanel = () => {
             </ListItemButton>
           </ListItem>
         ))}
-        <ListItem disablePadding>
-          <ListItemButton href="/registro-empleado">
-            <ListItemText primary="Registro de Empleado" />
-          </ListItemButton>
-        </ListItem>
       </List>
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
         <Button

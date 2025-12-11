@@ -6,11 +6,13 @@ import FilterPanel from "../components/vehicles/FilterPanel";
 import { reservationService } from "../services/reservationService";
 import { CarrosContext } from "../context/carroContext";
 import { CategoriasContext } from "../context/categoriaContext";
+import { SucursalesContext } from "../context/sucursalcontext";
 import Header from "../components/layout/header";
 
 const VehicleList = () => {
   const { carros, loadCarros } = useContext(CarrosContext);
   const { categorias } = useContext(CategoriasContext);
+  const { sucursales } = useContext(SucursalesContext);
   const [searchParams] = useSearchParams();
   
   const [filters, setFilters] = useState({
@@ -144,6 +146,7 @@ const handleRentClick = (vehiculo) => {
               onSearch={handleSearch}
               categorias={categorias}
               brands={uniqueBrands}
+              sucursales={sucursales}
             />
           </Box>
 

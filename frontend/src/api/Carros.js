@@ -17,6 +17,13 @@ const fetchWithToken = async (url, options = {}) => {
   console.log("URL:", url, "Options:", options);
 
   const res = await fetch(url, options);
+  
+  // Verificar si la respuesta es JSON
+  const contentType = res.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error(`Error del servidor (${res.status}): La respuesta no es JSON`);
+  }
+
   const data = await res.json();
 
   console.log("Respuesta backend:", res.status, data);

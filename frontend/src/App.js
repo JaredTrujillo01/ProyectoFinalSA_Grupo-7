@@ -11,6 +11,7 @@ import { CarrosProvider } from "./context/carroContext";
 import { CategoriasProvider } from "./context/categoriaContext";
 import { ClientesProvider } from "./context/clientecontext";
 import { SucursalesProvider } from "./context/sucursalcontext";
+import { EmpleadosProvider } from "./context/empleadoContext";
 
 function App() {
   return (
@@ -18,10 +19,9 @@ function App() {
       <CarrosProvider>
         <CategoriasProvider>
           <ClientesProvider>
-            {" "}
-            {/* Ahora definido */}
             <SucursalesProvider>
-              <BrowserRouter>
+              <EmpleadosProvider>
+                <BrowserRouter>
                 <Routes>
                   {/* Redirecciona automáticamente de / a /login */}
                   <Route path="/" element={<Navigate to="/login" />} />
@@ -43,7 +43,8 @@ function App() {
                   />
                   <Route path="/panel-admin" element={<AdminPanel />} />
                 </Routes>
-              </BrowserRouter>
+                </BrowserRouter>
+              </EmpleadosProvider>
             </SucursalesProvider>
           </ClientesProvider>
         </CategoriasProvider>

@@ -33,4 +33,22 @@ const getCarros = async (req, res) => {
   }
 };
 
-module.exports = { createCarro, listCarros, getCarros };
+const editCarro = async (req, res) => {
+  try {
+    const updated = await updateCarro(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+const removeCarro = async (req, res) => {
+  try {
+    await deleteCarro(req.params.id);
+    res.json({ message: "Carro eliminado" });
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+module.exports = { createCarro, listCarros, getCarros, editCarro, removeCarro };

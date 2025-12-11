@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, TextField, MenuItem, Button, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy, categorias = [], brands = [] }) => {
+const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy, categorias = [], brands = [], sucursales = [] }) => {
   const [errors, setErrors] = useState({});
 
   const handleSearch = () => {
@@ -55,9 +55,11 @@ const SearchBar = ({ searchData, onSearchChange, onSearch, validationStrategy, c
           fullWidth
         >
           <MenuItem value="">Sucursal</MenuItem>
-          <MenuItem value="principal">Principal</MenuItem>
-          <MenuItem value="aeropuerto">Aeropuerto</MenuItem>
-          <MenuItem value="norte">Zona Norte</MenuItem>
+          {sucursales.map((suc) => (
+            <MenuItem key={suc.sucuersal_id} value={suc.nombre}>
+              {suc.nombre}
+            </MenuItem>
+          ))}
         </TextField>
 
         <TextField

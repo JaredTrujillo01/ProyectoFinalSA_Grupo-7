@@ -18,4 +18,22 @@ const listCategorias = async (req,res) => {
   }
 };
 
-module.exports = { createCategoria, listCategorias };
+const editCategoria = async (req, res) => {
+  try {
+    const updated = await updateCategoria(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+const removeCategoria = async (req, res) => {
+  try {
+    await deleteCategoria(req.params.id);
+    res.json({ message: "Categoría eliminada" });
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+module.exports = { createCategoria, listCategorias, editCategoria, removeCategoria };

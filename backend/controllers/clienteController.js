@@ -26,4 +26,22 @@ const getClienteById = async (req, res) => {
   }
 };
 
-module.exports = { createCliente, getClientes, getClienteById};
+const editCliente = async (req, res) => {
+  try {
+    const updated = await updateCliente(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+const removeCliente = async (req, res) => {
+  try {
+    await deleteCliente(req.params.id);
+    res.json({ message: "Cliente eliminado" });
+  } catch (err) {
+    res.status(err.status || 400).json({ error: err.message });
+  }
+};
+
+module.exports = { createCliente, getClientes, getClienteById, editCliente, removeCliente };

@@ -1,7 +1,7 @@
 
 import { Box, TextField, MenuItem, Button, Stack } from "@mui/material";
 
-const FilterPanel = ({ filters, onChangeFilters, onSearch, categorias = [], brands = [] }) => {
+const FilterPanel = ({ filters, onChangeFilters, onSearch, categorias = [], brands = [], sucursales = [] }) => {
   const handle = (field) => (e) => {
     onChangeFilters({ ...filters, [field]: e.target.value });
   };
@@ -18,8 +18,11 @@ const FilterPanel = ({ filters, onChangeFilters, onSearch, categorias = [], bran
           margin="dense"
         >
           <MenuItem value="">Todas</MenuItem>
-          <MenuItem value="Tegucigalpa">Tegucigalpa</MenuItem>
-          <MenuItem value="San Pedro">San Pedro</MenuItem>
+          {sucursales.map((suc) => (
+            <MenuItem key={suc.sucuersal_id} value={suc.nombre}>
+              {suc.nombre}
+            </MenuItem>
+          ))}
         </TextField>
 
         <TextField
