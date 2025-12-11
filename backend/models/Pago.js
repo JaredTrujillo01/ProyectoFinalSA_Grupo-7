@@ -12,4 +12,9 @@ const Pago = sequelize.define('Pago', {
   timestamps: false
 });
 
+// Asociaciones
+Pago.associate = (models) => {
+  Pago.belongsTo(models.Alquiler, { foreignKey: 'alquiler_id' });
+};
+
 module.exports = Pago;

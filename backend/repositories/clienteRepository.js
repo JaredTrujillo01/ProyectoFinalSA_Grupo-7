@@ -4,6 +4,7 @@ const createCliente = async (data, options = {}) => {
   return await Cliente.create(data, options);
 };
 const findClienteById = async (id) => Cliente.findByPk(id);
+const findClienteByUsuarioId = async (usuario_id) => Cliente.findOne({ where: { usuario_id } });
 const findAllClientes = async () => Cliente.findAll();
 const updateCliente = async (id, changes, options = {}) => {
   // Solo actualizar campos específicos, evitar sobrescribir usuario_id
@@ -19,5 +20,5 @@ const updateCliente = async (id, changes, options = {}) => {
 };
 const deleteCliente = async (id) => Cliente.destroy({ where: { cliente_id: id } });
 
-module.exports = { createCliente, findClienteById, findAllClientes, updateCliente, deleteCliente };
+module.exports = { createCliente, findClienteById, findClienteByUsuarioId, findAllClientes, updateCliente, deleteCliente };
 

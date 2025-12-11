@@ -1,41 +1,47 @@
-import React, { useState, useEffect } from "react";
-import { Container, Card, CardContent, Typography, Box, Button, Alert } from "@mui/material";
+import React, { useState, useEffect, useContext } from "react";
+import { Container, Card, CardContent, Typography, Box, Button, Alert, CircularProgress } from "@mui/material";
 import VehicleCard from "../components/vehicles/VehicleCard";
-import DateChangeDialog from "../components/reservations/DateChangeDialog"; // if you used the earlier component; else we include small local dialog
+import DateChangeDialog from "../components/reservations/DateChangeDialog";
 import { useLocation, useNavigate } from "react-router-dom";
 import { reservationService } from "../services/reservationService";
 import { calculatePaymentTotal } from "../services/paymentCalculator";
+import { AlquilerContext } from "../context/alquilerContext";
+import { AuthContext } from "../context/AuthContext";
+import Header from "../components/layout/header";
 
 const ReservationPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const { addAlquiler } = useContext(AlquilerContext);
+  
   const [vehicle, setVehicle] = useState(state?.vehiculo ?? null);
   const [branch, setBranch] = useState(state?.branch ?? "");
   const [startDate, setStartDate] = useState(state?.dateRange?.startDate ?? "");
   const [endDate, setEndDate] = useState(state?.dateRange?.endDate ?? "");
   const [error, setError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!vehicle) {
       const temp = reservationService.loadTemp();
       if (temp) {
-        // map temp back to vehicle-like object
         setVehicle({
           carro_id: temp.vehicleId,
-          nombre: temp.name,
+          marca: temp.marca || temp.name?.split(" ")?.[0] || "",
+          modelo: temp.modelo || temp.name?.split(" ").slice(1).join(" ") || "",
           categoria: temp.category,
           placa: temp.plate,
           anio: temp.year,
           estado: temp.status,
           imagen: temp.image,
-          precio: temp.daily_price
+          daily_price: temp.daily_price
         });
         setStartDate(temp.startDate);
         setEndDate(temp.endDate);
         setBranch(temp.branch);
       } else {
-        // no vehicle: redirije a lista
         navigate("/lista-vehiculos");
       }
     }
@@ -48,7 +54,7 @@ const ReservationPage = () => {
     setEndDate(e);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setError("");
     if (!startDate || !endDate) {
       setError("Selecciona un rango de fechas válido.");
@@ -59,78 +65,111 @@ const ReservationPage = () => {
       return;
     }
 
-    // crea el payload
-    const payload = reservationService.makeReservationPayload({
-      vehicle,
-      startDate,
-      endDate,
-      branch
-    });
+    setLoading(true);
+    try {
+      // Calcular costo total
+      const total = calculatePaymentTotal(vehicle.daily_price || vehicle.categoria?.costo_por_dia, startDate, endDate);
 
-    // calcula total
-    const total = calculatePaymentTotal(payload.daily_price, startDate, endDate);
-    payload.totalAmount = total;
+      // Crear alquiler en backend (sin pagar todavía)
+      const alquilerData = {
+        cliente_id: user?.cliente_id,
+        carro_id: vehicle.carro_id,
+        fecha_inicio: startDate,
+        fecha_fin: endDate,
+        costo_total: total,
+        pagarAhora: false
+      };
 
-    // guarda temp en localStorage como fallback
-    reservationService.saveTemp(payload);
+      const newAlquiler = await addAlquiler(alquilerData);
 
-    // naviga a los pagos desde reservación
-    navigate("/pago", { state: { reservation: payload } });
+      // Crear payload para PaymentPage
+      const payload = {
+        name: `${vehicle.marca} ${vehicle.modelo}`,
+        startDate,
+        endDate,
+        daily_price: vehicle.daily_price || vehicle.categoria?.costo_por_dia,
+        totalAmount: total,
+        alquiler_id: newAlquiler.alquiler_id
+      };
+
+      // Navegar a pagos
+      navigate("/pagos", { state: { reservation: payload } });
+    } catch (err) {
+      setError(err.message || "Error al crear el alquiler");
+      console.error("Error al crear alquiler:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!vehicle) return null;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Card sx={{ p: 2 }}>
-        <CardContent>
-          <Typography variant="h5" textAlign="center" mb={2}>Confirma tu Reservación</Typography>
+    <>
+      <Header />
+      <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+        <Card sx={{ p: 2 }}>
+          <CardContent>
+            <Typography variant="h5" textAlign="center" mb={2}>Confirma tu Reservación</Typography>
 
-          <Box mb={2}>
-            <VehicleCard
-              vehiculo={{
-                imagen: vehicle.imagen,
-                marca: vehicle.marca || vehicle.nombre?.split(" ")?.[0],
-                modelo: vehicle.modelo || vehicle.nombre,
-                categoria: vehicle.categoria,
-                placa: vehicle.placa,
-                anio: vehicle.anio,
-                estado: vehicle.estado,
-                precioDia: vehicle.precio ?? vehicle.daily_price ?? vehicle.precioDia
-              }}
-              showButton={false}
-            />
-          </Box>
-
-          <Box sx={{ p: 2, boxShadow: 4, borderRadius: 2, mb: 2 }}>
-            <Typography variant="subtitle2">Fecha de alquiler del vehículo:</Typography>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
-              <Typography>{startDate || "—"} — {endDate || "—"}</Typography>
-              <Button size="small" onClick={openDateDialog}>Modificar</Button>
+            <Box mb={2}>
+              <VehicleCard
+                vehiculo={{
+                  carro_id: vehicle.carro_id,
+                  marca: vehicle.marca,
+                  modelo: vehicle.modelo,
+                  categoria: vehicle.categoria,
+                  placa: vehicle.placa,
+                  anio: vehicle.anio,
+                  estado: vehicle.estado,
+                  imagen: vehicle.imagen
+                }}
+                showButton={false}
+              />
             </Box>
 
-            <Box mt={2}>
-              <Typography variant="subtitle2">Sucursal:</Typography>
-              <Typography>{branch || "Sucursal principal"}</Typography>
+            <Box sx={{ p: 2, boxShadow: 4, borderRadius: 2, mb: 2 }}>
+              <Typography variant="subtitle2">Fecha de alquiler del vehículo:</Typography>
+              <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
+                <Typography>{startDate || "—"} — {endDate || "—"}</Typography>
+                <Button size="small" onClick={openDateDialog}>Modificar</Button>
+              </Box>
+
+              <Box mt={2}>
+                <Typography variant="subtitle2">Sucursal:</Typography>
+                <Typography>{branch || "Sucursal principal"}</Typography>
+              </Box>
+              
+              <Box mt={2}>
+                <Typography variant="subtitle2">Precio diario:</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  ${Number(vehicle.daily_price || vehicle.categoria?.costo_por_dia || 0).toFixed(2)}
+                </Typography>
+              </Box>
+
+              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
             </Box>
-            {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-          </Box>
 
-          <Box display="flex" gap={2}>
-            <Button variant="outlined" onClick={() => navigate("/lista-vehiculos")}>Volver</Button>
-            <Button variant="contained" onClick={handleConfirm}>Confirmar y pagar</Button>
-          </Box>
-        </CardContent>
-      </Card>
+            <Box display="flex" gap={2}>
+              <Button variant="outlined" onClick={() => navigate("/lista-vehiculos")} disabled={loading}>
+                Volver
+              </Button>
+              <Button variant="contained" onClick={handleConfirm} disabled={loading}>
+                {loading ? <CircularProgress size={24} /> : "Confirmar y pagar"}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
 
-      <DateChangeDialog
-        open={dialogOpen}
-        initialStart={startDate}
-        initialEnd={endDate}
-        onClose={() => setDialogOpen(false)}
-        onSave={({ startDate: s, endDate: e }) => saveDates({ startDate: s, endDate: e })}
-      />
-    </Container>
+        <DateChangeDialog
+          open={dialogOpen}
+          initialStart={startDate}
+          initialEnd={endDate}
+          onClose={() => setDialogOpen(false)}
+          onSave={({ startDate: s, endDate: e }) => saveDates({ startDate: s, endDate: e })}
+        />
+      </Container>
+    </>
   );
 };
 

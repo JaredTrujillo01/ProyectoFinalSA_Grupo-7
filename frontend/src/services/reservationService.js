@@ -4,6 +4,8 @@ export const reservationService = {
   makeReservationPayload: ({ vehicle, startDate, endDate, branch }) => {
     const base = {
       vehicleId: vehicle.carro_id ?? vehicle.id ?? vehicle.vehicle_id,
+      marca: vehicle.marca || "",
+      modelo: vehicle.modelo || "",
       name: vehicle.nombre || `${vehicle.marca || ""} ${vehicle.modelo || ""}`.trim(),
       category: vehicle.categoria || vehicle.category || "",
       plate: vehicle.placa || vehicle.plate || "",

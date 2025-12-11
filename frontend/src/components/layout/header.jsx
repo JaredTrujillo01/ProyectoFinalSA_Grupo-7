@@ -33,8 +33,6 @@ const Header = ({onMenuClick, onProfileClick}) => {
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
           <Button color="inherit" href="/home">Inicio</Button>
           <Button color="inherit" href="/lista-vehiculos">Lista de Vehículos</Button>
-          <Button color="inherit" href="#pagos">Pagos</Button>
-          <Button color="inherit" href="#perfil">Perfil</Button>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

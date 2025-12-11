@@ -7,7 +7,7 @@ const Carro = sequelize.define('Carro', {
   marca: { type: DataTypes.STRING(50), allowNull: false },
   modelo: { type: DataTypes.STRING(50), allowNull: false },
   anio: { type: DataTypes.INTEGER, allowNull: true },
-  estado: { type: DataTypes.ENUM('disponible','alquilado','mantenimiento'), defaultValue: 'disponible' },
+  estado: { type: DataTypes.ENUM('disponible','alquilado','mantenimiento','reservado'), defaultValue: 'disponible' },
   categoria_id: { type: DataTypes.INTEGER, allowNull: true },
   
 }, {

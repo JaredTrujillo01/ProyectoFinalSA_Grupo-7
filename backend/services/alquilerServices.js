@@ -13,9 +13,9 @@ const rangesOverlap = (startA, endA, startB, endB) => {
 };
 
 // CREAR RESERVA
-const createReservation = async ({ usuario_id, carro_id, fecha_inicio, fecha_fin, pagarAhora = true, metodo_pago = "tarjeta" }) => {
+const createReservation = async ({ usuario_id, cliente_id, carro_id, fecha_inicio, fecha_fin, costo_total, pagarAhora = true, metodo_pago = "tarjeta" }) => {
   
-  if (!usuario_id || !carro_id || !fecha_inicio || !fecha_fin) {
+  if (!carro_id || !fecha_inicio || !fecha_fin) {
     throw new ValidationError("Faltan datos obligatorios");
   }
 
@@ -24,8 +24,17 @@ const createReservation = async ({ usuario_id, carro_id, fecha_inicio, fecha_fin
 
   if (fin < inicio) throw new ValidationError("fecha_fin debe ser >= fecha_inicio");
 
-  const cliente = await findClienteByUsuarioId(usuario_id);
-  if (!cliente) throw new ValidationError("El usuario no está vinculado a un cliente");
+  // Si no viene cliente_id, obtenerlo del usuario_id
+  let finalClienteId = cliente_id;
+  if (!finalClienteId && usuario_id) {
+    const cliente = await findClienteByUsuarioId(usuario_id);
+    if (!cliente) throw new ValidationError("El usuario no está vinculado a un cliente");
+    finalClienteId = cliente.cliente_id;
+  }
+
+  if (!finalClienteId) {
+    throw new ValidationError("No se encontró el cliente");
+  }
 
   const carro = await findCarroById(carro_id);
   if (!carro) throw new NotFoundError("Carro no encontrado");
@@ -44,40 +53,39 @@ const createReservation = async ({ usuario_id, carro_id, fecha_inicio, fecha_fin
     }
   }
 
-  // CALCULAR COSTO
-  const categoria = await findCategoriaById(carro.categoria_id);
-  const dias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
-  const costo_total = dias * parseFloat(categoria.costo_por_dia);
+  // CALCULAR COSTO si no viene costo_total
+  let finalCosto = costo_total;
+  if (!finalCosto) {
+    const categoria = await findCategoriaById(carro.categoria_id);
+    const dias = Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)) + 1;
+    finalCosto = dias * parseFloat(categoria.costo_por_dia);
+  }
 
   // Transacción completa
   return await sequelize.transaction(async (t) => {
 
     const alquiler = await createAlquiler({
-      cliente_id: cliente.cliente_id,
+      cliente_id: finalClienteId,
       carro_id,
       fecha_inicio,
       fecha_fin,
       estado: 'reservado',
-      costo_total
+      costo_total: finalCosto
     }, { transaction: t });
 
-    await createPago({
-      alquiler_id: alquiler.alquiler_id,
-      monto: costo_total,
-      metodo_pago: pagarAhora ? metodo_pago : "pendiente",
-      estado: pagarAhora ? "completado" : "pendiente"
-    }, { transaction: t });
+    // Si pagarAhora es true, crear pago inmediatamente
+    if (pagarAhora) {
+      await createPago({
+        alquiler_id: alquiler.alquiler_id,
+        monto: finalCosto,
+        metodo_pago: metodo_pago,
+        estado: "completado"
+      }, { transaction: t });
+    }
 
     await updateCarro(carro_id, { estado: "reservado" }, { transaction: t });
 
-    return {
-      alquiler,
-      detalle: {
-        dias,
-        costo_total,
-        costo_por_dia: categoria.costo_por_dia
-      }
-    };
+    return alquiler;
   });
 };
 

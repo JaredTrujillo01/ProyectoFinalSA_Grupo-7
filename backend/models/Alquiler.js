@@ -19,4 +19,11 @@ const Alquiler = sequelize.define('Alquiler', {
   timestamps: false
 });
 
+// Asociaciones
+Alquiler.associate = (models) => {
+  Alquiler.belongsTo(models.Cliente, { foreignKey: 'cliente_id' });
+  Alquiler.belongsTo(models.Carro, { foreignKey: 'carro_id' });
+  Alquiler.hasMany(models.Pago, { foreignKey: 'alquiler_id' });
+};
+
 module.exports = Alquiler;

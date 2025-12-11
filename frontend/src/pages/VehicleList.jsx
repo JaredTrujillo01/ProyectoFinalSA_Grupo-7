@@ -125,7 +125,7 @@ const handleRentClick = (vehiculo) => {
 
   reservationService.saveTemp(payload);
 
-  window.location.href = "/reserva";
+  window.location.href = "/alquiler";
 };
 
   return (

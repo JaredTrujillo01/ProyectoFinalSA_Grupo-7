@@ -63,8 +63,24 @@ const loginUsuario = async (email, password) => {
   
   console.log('Usuario encontrado:', { id: usuarioObj.usuario_id, email: usuarioObj.email, rol });
 
-  // Devuelve token JWT
-  const payload = { id: usuarioObj.usuario_id, nombre: usuarioObj.nombre, rol, email: usuarioObj.email };
+  // Obtener cliente_id si el rol es cliente
+  let cliente_id = null;
+  if (rol === 'cliente') {
+    const { findClienteByUsuarioId } = require('../repositories/clienteRepository');
+    const cliente = await findClienteByUsuarioId(usuarioObj.usuario_id);
+    if (cliente) {
+      cliente_id = cliente.cliente_id;
+    }
+  }
+
+  // Devuelve token JWT con cliente_id
+  const payload = { 
+    id: usuarioObj.usuario_id, 
+    nombre: usuarioObj.nombre, 
+    rol, 
+    email: usuarioObj.email,
+    cliente_id: cliente_id
+  };
   const token = generateToken(payload);
 
   return { message: 'Login exitoso', token, usuario: payload };
