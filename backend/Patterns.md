@@ -1,8 +1,6 @@
 ## Patrones validados en el backend
 
-Cumplimos con ≥2 patrones aplicados, justificados y verificados en ejecuciones reales de rutas protegidas y públicas.
-
----
+Cumplimos con 2 patrones aplicados, justificados y verificados en ejecuciones reales de rutas protegidas y públicas.
 
 ### 1) Facade / Service Layer (patrón principal)
 
