@@ -136,44 +136,47 @@ const handleRentClick = (vehiculo) => {
           Lista de Vehículos
         </Typography>
 
-      <Grid container spacing={3}>
-        {/* Panel filtros */}
-        <Grid item xs={12} md={3}>
-          <Box sx={{ p: 2, boxShadow: 4, borderRadius: 2 }}>
-            <FilterPanel
-              filters={filters}
-              onChangeFilters={setFilters}
-              onSearch={handleSearch}
-              categorias={categorias}
-              brands={uniqueBrands}
-              sucursales={sucursales}
-            />
+        <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
+          {/* Panel filtros - Columna izquierda */}
+          <Box sx={{ width: { xs: '100%', md: '300px' }, flexShrink: 0 }}>
+            <Box sx={{ 
+              p: 2, 
+              boxShadow: 4, 
+              borderRadius: 2, 
+              bgcolor: 'white',
+              position: 'sticky',
+              top: 80
+            }}>
+              <FilterPanel
+                filters={filters}
+                onChangeFilters={setFilters}
+                onSearch={handleSearch}
+                categorias={categorias}
+                brands={uniqueBrands}
+                sucursales={sucursales}
+              />
+            </Box>
+
+            {errorFecha && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {errorFecha}
+              </Alert>
+            )}
           </Box>
 
-          {errorFecha && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {errorFecha}
-            </Alert>
-          )}
-        </Grid>
-
-        {/* Lista */}
-        <Grid item xs={12} md={9}>
-          <Grid container spacing={2}>
-            {vehiculos.length === 0 && (
-              <Grid item xs={12}>
-                <Alert severity="info">No se encontraron vehículos.</Alert>
-              </Grid>
+          {/* Lista de vehículos - Columna derecha */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {vehiculos.length === 0 ? (
+              <Alert severity="info">No se encontraron vehículos con los filtros seleccionados.</Alert>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {vehiculos.map((v) => (
+                  <VehicleCard key={v.carro_id} vehiculo={v} onRentClick={handleRentClick} />
+                ))}
+              </Box>
             )}
-
-            {vehiculos.map((v) => (
-              <Grid item xs={12} key={v.carro_id}>
-                <VehicleCard vehiculo={v} onRentClick={handleRentClick} />
-              </Grid>
-            ))}
-          </Grid>
-        </Grid>
-      </Grid>
+          </Box>
+        </Box>
       </Box>
     </Container>
   );

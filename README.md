@@ -1,5 +1,11 @@
 # Proyecto: Sistema de Alquiler de Vehículos — Grupo 7
 
+# Integrantes
+Eduardo Jared Trujillo Gamero / 62211761
+Johan Josue Peraza Avilez / 62211083
+Roberto Gabriel Ortega Altamirano / 62221118
+Fabiola Michelle Lainez Hernandez / 62211080
+
 Ingeniería de Software 2 – Proyecto Final
 
 ## Cómo ejecutar el proyecto
@@ -24,7 +30,6 @@ JWT_SECRET=supersecret
 
 ```bash
 cd backend
-npm install
 npm run dev
 ```
 Backend disponible en: `http://localhost:4000`
@@ -33,7 +38,6 @@ Backend disponible en: `http://localhost:4000`
 
 ```bash
 cd frontend
-npm install
 npm start
 ```
 
